@@ -13,4 +13,10 @@ public interface AuctionDAO {
     List<AuctionVO> getAuctionsBySellerId(String userId);
 
     List<AuctionVO> getAllAuctions();
+
+    void markAuctionsAsInactive(List<String> auctionIds);
+
+    void updateAuction(AuctionVO auction);
+
+    void deleteAuction(String auctionId);
 }

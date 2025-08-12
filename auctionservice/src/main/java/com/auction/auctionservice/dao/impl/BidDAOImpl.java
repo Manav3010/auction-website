@@ -27,6 +27,10 @@ public class BidDAOImpl implements BidDAO {
     @Value("${GET_BIDS_FOR_AUCTION}")
     private String getBidsForAuctionSQL;
 
+    // NEW: SQL query for getting user bids
+    @Value("${GET_BIDS_FOR_USER}")
+    private String getBidsForUserSQL;
+
     private static final Logger logger = LogManager.getLogger(BidDAOImpl.class);
 
     @Override
@@ -56,6 +60,21 @@ public class BidDAOImpl implements BidDAO {
             );
         } catch (Exception e) {
             logger.fatal("Error in getBidsForAuction: " + e);
+            throw e;
+        }
+    }
+
+    // NEW: Get bids for user implementation
+    @Override
+    public List<BidVO> getBidsForUser(String userId) {
+        try {
+            return jdbcTemplate.query(
+                    getBidsForUserSQL,
+                    new Object[]{userId},
+                    new BidVORowMapper()
+            );
+        } catch (Exception e) {
+            logger.fatal("Error in getBidsForUser: " + e);
             throw e;
         }
     }

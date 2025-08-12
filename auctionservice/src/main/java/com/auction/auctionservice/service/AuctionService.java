@@ -15,4 +15,11 @@ public interface AuctionService {
     List<AuctionResponseVO> getAuctionsBySellerId(String userId);
 
     List<AuctionResponseVO> getAllAuctions();
+
+    void markAuctionsAsExpired(List<String> auctionIds);
+
+    // NEW: Update and delete auction methods for frontend integration
+    AuctionResponseVO updateAuction(String auctionId, AuctionRequestVO request);
+
+    void deleteAuction(String auctionId);
 }

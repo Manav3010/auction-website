@@ -50,4 +50,14 @@ public class BidServiceImpl implements BidService {
             throw e;
         }
     }
+
+    @Override
+    public List<BidVO> getBidsForUser(String userId) {
+        try {
+            return bidDao.getBidsForUser(userId);
+        } catch (Exception e) {
+            logger.fatal("Error in getBidsForUser: " + e.getMessage(), e);
+            throw e;
+        }
+    }
 }

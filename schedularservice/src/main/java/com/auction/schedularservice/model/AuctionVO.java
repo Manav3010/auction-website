@@ -1,18 +1,10 @@
 package com.auction.schedularservice.model;
-
-
-
-
 import java.time.LocalDateTime;
-
-
 
 public class AuctionVO {
 
-
     private String auctionId;
     private long endTime;
-
 
     public AuctionVO(long endTime, String auctionId) {
         this.endTime = endTime;

@@ -1,6 +1,9 @@
 package com.auction.schedularservice.service;
 
 import com.auction.schedularservice.model.AuctionVO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +12,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class AuctionExpiryService {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing.expired}")
+    private String expiredRoutingKey;
 
     private final PriorityQueue<AuctionVO> auctionQueue =
             new PriorityQueue<>(Comparator.comparingLong(AuctionVO::getEndTime));
@@ -32,6 +44,7 @@ public class AuctionExpiryService {
 
         if (!expiredIds.isEmpty()) {
             // TODO: Send expiredIds to RabbitMQ
+            rabbitTemplate.convertAndSend(exchange, expiredRoutingKey, expiredIds);
             System.out.println("Expired auctions: " + expiredIds);
         }
     }

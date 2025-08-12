@@ -45,4 +45,15 @@ public class BidController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    // NEW: Get user bids endpoint for frontend integration
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<BidVO>> getBidsForUser(@PathVariable String userId) {
+        try {
+            return ResponseEntity.ok(bidService.getBidsForUser(userId));
+        } catch (Exception e) {
+            logger.fatal("Error in getBidsForUser: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

@@ -16,7 +16,7 @@ public class AuctionCreatedListener {
 
     @RabbitListener(queues = "${rabbitmq.queue.created}")
     public void receiveAuction(AuctionVO auctionVO) {
-        System.out.println("Received auction: " + auctionVO.getAuctionId());
+        //System.out.println("Received auction: " + auctionVO.getAuctionId());
         auctionExpiryService.addOrUpdateAuction(auctionVO.getAuctionId(), auctionVO.getEndTime());
     }
 }

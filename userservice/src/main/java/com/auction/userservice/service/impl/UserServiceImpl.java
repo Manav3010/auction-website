@@ -59,4 +59,24 @@ public class UserServiceImpl implements UserService {
         }
 
     }
+
+    @Override
+    public UserDto authenticateUser(String username, String password) {
+        try {
+            return userDao.authenticateUser(username, password);
+        } catch (Exception e) {
+            logger.fatal("Error in authenticateUser: " + e);
+            throw e;
+        }
+    }
+
+    @Override
+    public UserDto updateUserProfile(String userId, UserDto userDto) {
+        try {
+            return userDao.updateUserProfile(userId, userDto);
+        } catch (Exception e) {
+            logger.fatal("Error in updateUserProfile: " + e);
+            throw e;
+        }
+    }
 }

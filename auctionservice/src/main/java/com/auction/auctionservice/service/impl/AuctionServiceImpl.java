@@ -9,12 +9,17 @@ import com.auction.auctionservice.model.AuctionVO;
 import com.auction.auctionservice.service.AuctionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,15 @@ public class AuctionServiceImpl implements AuctionService {
     @Autowired
     @Qualifier(AuctionConstants.AUCTIONDAOIMPL)
     private AuctionDAO auctionDao;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing.created}")
+    private String createdRoutingKey;
 
     private static final Logger logger = LogManager.getLogger(AuctionServiceImpl.class);
 
@@ -42,6 +56,13 @@ public class AuctionServiceImpl implements AuctionService {
             auction.setActive(true);
 
             auctionDao.createAuction(auction);
+
+            Map<String, Object> message = new HashMap<>();
+            message.put("auctionId", auction.getAuctionId());
+            message.put("endTime", auction.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+            rabbitTemplate.convertAndSend(exchange, createdRoutingKey, message);
+
             return mapToResponseVO(auction);
         } catch (Exception e) {
             logger.fatal("Error in createAuction: " + e.getMessage(), e);
@@ -80,6 +101,63 @@ public class AuctionServiceImpl implements AuctionService {
                     .collect(Collectors.toList());
         } catch (Exception e) {
             logger.fatal("Error in getAllAuctions: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void markAuctionsAsExpired(List<String> auctionIds) {
+        try {
+            auctionDao.markAuctionsAsInactive(auctionIds);
+        } catch (Exception e) {
+            logger.fatal("Failed to mark auctions as inactive: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public AuctionResponseVO updateAuction(String auctionId, AuctionRequestVO request) {
+        try {
+            // First check if auction exists and is still active
+            AuctionVO existingAuction = auctionDao.getAuctionById(auctionId);
+
+            if (!existingAuction.isActive()) {
+                throw new RuntimeException("Cannot update inactive auction");
+            }
+
+            // Update auction details
+            existingAuction.setItemName(request.getItemName());
+            existingAuction.setDescription(request.getDescription());
+            existingAuction.setEndTime(LocalDateTime.parse(request.getEndTime()));
+
+            // Only allow updating starting price if no bids have been placed
+            if (existingAuction.getCurrentPrice().equals(existingAuction.getStartingPrice())) {
+                existingAuction.setStartingPrice(request.getStartingPrice());
+                existingAuction.setCurrentPrice(request.getStartingPrice());
+            }
+
+            auctionDao.updateAuction(existingAuction);
+            return mapToResponseVO(existingAuction);
+        } catch (Exception e) {
+            logger.fatal("Error in updateAuction: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteAuction(String auctionId) {
+        try {
+            // First check if auction exists and can be deleted
+            AuctionVO existingAuction = auctionDao.getAuctionById(auctionId);
+
+            // Only allow deletion if auction hasn't started or has no bids
+            if (existingAuction.getCurrentPrice().compareTo(existingAuction.getStartingPrice()) > 0) {
+                throw new RuntimeException("Cannot delete auction with existing bids");
+            }
+
+            auctionDao.deleteAuction(auctionId);
+        } catch (Exception e) {
+            logger.fatal("Error in deleteAuction: " + e.getMessage(), e);
             throw e;
         }
     }
