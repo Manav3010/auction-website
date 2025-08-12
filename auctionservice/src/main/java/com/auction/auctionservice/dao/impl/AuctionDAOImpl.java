@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository(AuctionConstants.AUCTIONDAOIMPL)
 @PropertySource("classpath:postgres.properties")
@@ -33,6 +34,16 @@ public class AuctionDAOImpl implements AuctionDAO {
 
     @Value("${FIND_ALL_AUCTIONS}")
     private String findAllAuctionsSQL;
+
+    @Value("${UPDATE_EXPIRED_AUCTIONS}")
+    private String updateExpiredAuctions;
+
+    // NEW: SQL queries for update and delete operations
+    @Value("${UPDATE_AUCTION}")
+    private String updateAuctionSQL;
+
+    @Value("${DELETE_AUCTION}")
+    private String deleteAuctionSQL;
 
     private static final Logger logger = LogManager.getLogger(AuctionDAOImpl.class);
 
@@ -97,6 +108,59 @@ public class AuctionDAOImpl implements AuctionDAO {
             );
         } catch (Exception e) {
             logger.fatal("Error in getAllAuctions: " + e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void markAuctionsAsInactive(List<String> auctionIds) {
+        if (auctionIds == null || auctionIds.isEmpty()) return;
+
+        try {
+            String sql = updateExpiredAuctions
+                    .formatted(auctionIds.stream().map(id -> "?").collect(Collectors.joining(",")));
+
+            jdbcTemplate.update(sql, auctionIds.toArray());
+        } catch (Exception e) {
+            logger.fatal("Error while marking auctions as inactive: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // NEW: Update auction implementation
+    @Override
+    public void updateAuction(AuctionVO auction) {
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    updateAuctionSQL,
+                    auction.getItemName(),
+                    auction.getDescription(),
+                    auction.getStartingPrice(),
+                    auction.getCurrentPrice(),
+                    auction.getEndTime(),
+                    auction.getAuctionId()
+            );
+
+            if (rowsAffected == 0) {
+                throw new RuntimeException("No auction found with ID: " + auction.getAuctionId());
+            }
+        } catch (Exception e) {
+            logger.fatal("Error in updateAuction: " + e);
+            throw e;
+        }
+    }
+
+    // NEW: Delete auction implementation
+    @Override
+    public void deleteAuction(String auctionId) {
+        try {
+            int rowsAffected = jdbcTemplate.update(deleteAuctionSQL, auctionId);
+
+            if (rowsAffected == 0) {
+                throw new RuntimeException("No auction found with ID: " + auctionId);
+            }
+        } catch (Exception e) {
+            logger.fatal("Error in deleteAuction: " + e);
             throw e;
         }
     }

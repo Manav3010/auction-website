@@ -13,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -42,10 +45,46 @@ public class UserController {
         try {
             return ResponseEntity.ok(userService.registerUser(request));
         } catch (Exception e) {
-            logger.fatal("Error in getUserProfile :" + e);
+            logger.fatal("Error in register :" + e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
+    // NEW: Login endpoint for frontend integration
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest){
+        try {
+            String username = loginRequest.get("username");
+            String password = loginRequest.get("password");
+
+            // TODO: Implement actual authentication logic
+            // For now, this is a basic implementation
+            UserDto user = userService.authenticateUser(username, password);
+
+            if (user != null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", "dummy-jwt-token-" + user.getId()); // Replace with actual JWT
+                response.put("user", user);
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (Exception e) {
+            logger.fatal("Error in login :" + e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    // NEW: Update user profile endpoint
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserDto> updateUserProfile(@PathVariable String userId, @RequestBody UserDto userDto){
+        try {
+            UserDto updatedUser = userService.updateUserProfile(userId, userDto);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            logger.fatal("Error in updateUserProfile :" + e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 
 }

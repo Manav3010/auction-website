@@ -1,0 +1,175 @@
+.register-page {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.register-form {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.register-form h2 {
+  text-align: center;
+  margin-bottom: 32px;
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.register-form .form-group {
+  margin-bottom: 20px;
+}
+
+.register-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.register-form .form-row .form-group {
+  margin-bottom: 0;
+}
+
+.register-form input,
+.register-form textarea {
+  height: 48px;
+  font-size: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.register-form textarea {
+  height: 80px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.register-form input:focus,
+.register-form textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.register-form .btn {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.register-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.register-footer p {
+  color: #6c757d;
+  margin: 0;
+}
+
+.register-footer a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Success State */
+.success-message {
+  text-align: center;
+  background: white;
+  padding: 60px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.success-message h2 {
+  color: #28a745;
+  margin-bottom: 16px;
+  font-size: 1.8rem;
+}
+
+.success-message p {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Error State */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+/* Loading State */
+.register-form .btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Required Field Indicator */
+.register-form label::after {
+  content: " *";
+  color: #dc3545;
+}
+
+.register-form label[for="address"]::after,
+.register-form label[for="phoneNumber"]::after {
+  content: "";
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .register-form .form-row .form-group {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-form {
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .register-form h2 {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+
+  .success-message {
+    padding: 40px 24px;
+    margin: 16px;
+  }
+
+  .success-message h2 {
+    font-size: 1.5rem;
+  }
+}

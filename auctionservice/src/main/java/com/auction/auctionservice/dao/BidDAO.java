@@ -8,4 +8,6 @@ public interface BidDAO {
     void placeBid(BidVO bid);
 
     List<BidVO> getBidsForAuction(String auctionId);
+
+    List<BidVO> getBidsForUser(String userId);
 }

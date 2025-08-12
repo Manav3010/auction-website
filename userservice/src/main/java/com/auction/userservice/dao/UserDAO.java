@@ -13,4 +13,10 @@ public interface UserDAO {
     UserDto registerUser(User user);
 
     boolean existsByEmail(@NotBlank(message="Email is Required") @Email(message="Invalid email format") String email);
+
+    // NEW: Authentication method for login
+    UserDto authenticateUser(String username, String password) throws RuntimeException;
+
+    // NEW: Update user profile method
+    UserDto updateUserProfile(String userId, UserDto userDto) throws RuntimeException;
 }

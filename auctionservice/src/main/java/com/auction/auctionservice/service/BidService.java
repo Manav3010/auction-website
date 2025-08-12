@@ -9,4 +9,6 @@ public interface BidService {
     void placeBid(BidRequestVO request);
 
     List<BidVO> getBidsForAuction(String auctionId);
+
+    List<BidVO> getBidsForUser(String userId);
 }

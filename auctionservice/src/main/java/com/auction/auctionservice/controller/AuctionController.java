@@ -66,4 +66,28 @@ public class AuctionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    // NEW: Update auction endpoint for frontend integration
+    @PutMapping("/{auctionId}")
+    public ResponseEntity<AuctionResponseVO> updateAuction(@PathVariable String auctionId, @Valid @RequestBody AuctionRequestVO request) {
+        try {
+            AuctionResponseVO updatedAuction = auctionService.updateAuction(auctionId, request);
+            return ResponseEntity.ok(updatedAuction);
+        } catch (Exception e) {
+            logger.fatal("Error in updateAuction: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    // NEW: Delete auction endpoint for frontend integration
+    @DeleteMapping("/{auctionId}")
+    public ResponseEntity<String> deleteAuction(@PathVariable String auctionId) {
+        try {
+            auctionService.deleteAuction(auctionId);
+            return ResponseEntity.ok("Auction deleted successfully");
+        } catch (Exception e) {
+            logger.fatal("Error in deleteAuction: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete auction");
+        }
+    }
 }

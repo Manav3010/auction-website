@@ -30,6 +30,13 @@ public class UserDAOImpl implements UserDAO {
     @Value("${EXISTS_BY_EMAIL}")
     private String existsByEmail;
 
+    // NEW: SQL queries for authentication and profile update
+    @Value("${AUTHENTICATE_USER}")
+    private String authenticateUser;
+
+    @Value("${UPDATE_USER_PROFILE}")
+    private String updateUserProfile;
+
     private static final Logger logger = LogManager.getLogger(UserDAOImpl.class);
 
 
@@ -98,6 +105,49 @@ public class UserDAOImpl implements UserDAO {
             );
         } catch (Exception e) {
             logger.fatal("Error in existsByEmail :"+e);
+            throw e;
+        }
+    }
+
+    // NEW: Authentication method implementation
+    @Override
+    public UserDto authenticateUser(String username, String password) throws RuntimeException {
+        try {
+            return jdbcTemplate.queryForObject(
+                    authenticateUser,
+                    new Object[]{username, password},
+                    new UserRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            logger.fatal("Error in authenticateUser: Invalid credentials for user " + username);
+            throw new RuntimeException("Invalid username or password");
+        } catch (Exception e) {
+            logger.fatal("Error in authenticateUser: " + e);
+            throw e;
+        }
+    }
+
+    // NEW: Update user profile method implementation
+    @Override
+    public UserDto updateUserProfile(String userId, UserDto userDto) throws RuntimeException {
+        try {
+            int rows = jdbcTemplate.update(
+                    updateUserProfile,
+                    userDto.getFullName(),
+                    userDto.getEmail(),
+                    userDto.getAddress(),
+                    userDto.getPhoneNumber(),
+                    userId
+            );
+
+            if (rows > 0) {
+                // Return updated user profile
+                return findUserById(userId);
+            } else {
+                throw new RuntimeException("Failed to update user profile.");
+            }
+        } catch (Exception e) {
+            logger.fatal("Error in updateUserProfile: " + e);
             throw e;
         }
     }
